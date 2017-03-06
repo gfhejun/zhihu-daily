@@ -14,11 +14,10 @@ Vue.filter("zhihuDate", function(text) {
 		return '';
 	}
 
-	var year = text[0] + text[1] + text[2] + text[3] + '年';
 	var month = text[4] + text[5] + '月';
 	var date = text[6] + text[7] + '日'
 
-	return year + month + date;
+	return month + date;
 })
 
 //自定义指令
