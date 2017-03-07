@@ -2,7 +2,7 @@
 	<div>
 		<div class="list">
 			<scroller
-			height="93%" 
+			height="100%" 
 			lock-x 
 			scrollbar-y
 			use-pullup
