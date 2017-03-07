@@ -35,26 +35,6 @@
 		return is.object(history.state) ? history.state.key : location.href
 	}
 
-	const getBeforeDate = (dateStr) => {
-		var dateTime = new Date(
-			'' + dateStr[0] + dateStr[1] + dateStr[2] + dateStr[3], 
-			'' + dateStr[4] + dateStr[5],
-			'' + dateStr[6] + dateStr[7]).getTime();
-
-		var beforeDate = new Date(dateTime - 86400000);
-		var year = beforeDate.getFullYear();
-		var month = beforeDate.getMonth();
-		var date = beforeDate.getDate();
-		if (month < 10){
-			month = '0' + month;
-		}
-		if (date < 10){
-			date = '0' + date;
-		}
-
-		return year + month + date;
-	}
-
 	export default{
 		mixins: [routeData],
 		components:{
@@ -109,7 +89,7 @@
 
 				var url = this.newsListUrl;
 				if (isBefore){
-					url = this.beforeListUrl + '/' + getBeforeDate(this.currentDate);
+					url = this.beforeListUrl + '/' + this.currentDate;
 				}else{
 					//在新的list里不设置key，就无法恢复到原来的位置
 					var tempKey = this.list.key;
@@ -125,6 +105,8 @@
 						if (response.status == 200) {
 							var data = response.data;
 
+							this.currentDate = data.date;
+
 							if (!isBefore){
 								data.top_stories.forEach((item) => this.swipeList.push(
 									{
@@ -137,10 +119,12 @@
 								this.list.push({'date': this.currentDate});
 							}
 							
-							this.currentDate = data.date;
-							
 							data.stories.forEach((item) => this.list.push(item));
 							
+							if (isBefore){
+								this.$refs.scroller.donePullup();
+							}
+
 							this.$nextTick(() => {
 								this.$refs.scroller.reset();
 							});
