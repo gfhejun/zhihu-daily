@@ -1,26 +1,30 @@
 <template>
-	<div class="list">
-		<scroller 
-		height="93%" 
-		lock-x 
-		scrollbar-y
-		use-pullup
-		ref="scroller"
-		 @on-pullup-loading="loadData(true)" 
-		 :pullup-config="pullupConfig">
-			<div>
-				<swiper :list="swipeList" :auto="true" :loop="true" :interval="3000"></swiper>
-				<div v-for="news in list" class="news">
-					<div v-if="news.date" class="date">{{news.date | zhihuDate}}</div>
-					<div v-else>
-						<div class="title">{{news.title}}</div>
-						<div class="image">
-							<img :src="news.images[0]">
+	<div>
+		<div class="list">
+			<scroller
+			height="93%" 
+			lock-x 
+			scrollbar-y
+			use-pullup
+			ref="scroller"
+			@on-scroll="onScroll"
+			@on-pullup-loading="loadData(true)" 
+			:pullup-config="pullupConfig">
+				<div>
+					<swiper :list="swipeList" :auto="true" :loop="true" :interval="3000"></swiper>
+					<div v-for="news in list" class="news">
+						<div v-if="news.date" class="date">{{news.date | zhihuDate}}</div>
+						<div v-else>
+							<div class="title">{{news.title}}</div>
+							<div class="image">
+								<img :src="news.images[0]">
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</scroller>
+			</scroller>
+		</div>
+		<x-header :title="headerTitle" :left-options="{showBack: false}"></x-header>
 	</div>
 </template>
 <script type="text/javascript">
@@ -29,23 +33,30 @@
 	import axios from 'axios'
 	import is from 'is'
 
-	import { Swiper, Scroller } from 'vux'
+	import { Swiper, Scroller, XHeader } from 'vux'
 
 	const getPageKey = () => {
 		return is.object(history.state) ? history.state.key : location.href
+	}
+
+	const getZhihuDate = (text) => {
+		return text[4] + text[5] + '月' + text[6] + text[7] + '日';
 	}
 
 	export default{
 		mixins: [routeData],
 		components:{
 			Swiper,
-			Scroller
+			Scroller,
+			XHeader
 		},
 		routeData() {
 			return {
+				headerTitle: '今日热闻',
 				loading: false, //是否在请求中
 				list: [], //列表的数据
 				swipeList: [], //轮播列表数据
+				swiperHeight : 0, //轮播图高度
 				disableLoadingMore: true, //是否可以上拉加载更多
 				newsListUrl: config.url.host + config.url.latest,
 				beforeListUrl: config.url.host + config.url.before,
@@ -136,6 +147,15 @@
 						this.loading = false;
 						console.log('出现问题:' + response);
 					})
+			},
+			onScroll: function (position) {
+				if (this.swiperHeight <= 0){
+					this.swiperHeight = document.getElementsByClassName('vux-swiper')[0].clientHeight;
+				}
+
+				if (position.top <= this.swiperHeight){
+				    document.getElementsByClassName('vux-header')[0].style.opacity = position.top / this.swiperHeight;
+				}
 			}
 		}
 	}
@@ -146,6 +166,11 @@
 		top: 0;
 		bottom: 0;
 		width: 100%;
+	}
+
+	.vux-header{
+		opacity: 0;
+		background-color: #469CE7;
 	}
 
 	.news{
